@@ -5,7 +5,8 @@ export interface Product {
   description: string;
   price: string;
   currency: string;
-  hashtags: Array<string>;
+  hashtags: string;
+  pictures?: string;
   created: string;
   lastUpdate: string;
 }

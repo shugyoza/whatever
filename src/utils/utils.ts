@@ -50,6 +50,21 @@ export function sendCSS(
   });
 }
 
+export function sendJS(
+  filePath: string,
+  res: http.ServerResponse<http.IncomingMessage>
+) {
+  fs.readFile(filePath, (err, readResponse) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.writeHead(200, { "Content-Type": "text/javascript" });
+      res.write(readResponse);
+    }
+    res.end();
+  });
+}
+
 // method to extract values from POST request body
 export function extractPOSTData(req: http.IncomingMessage) {
   return new Promise((resolve, reject) => {

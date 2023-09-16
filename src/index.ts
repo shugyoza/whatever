@@ -1,7 +1,7 @@
 import http from "http";
 
 import { ProductController } from "./controllers/product.controller";
-import { sendHTML, sendCSS } from "./utils/utils";
+import { sendHTML, sendCSS, sendJS } from "./utils/utils";
 
 const hostname = "127.0.0.1";
 const port = 3000;
@@ -11,13 +11,25 @@ const productController = new ProductController();
 const server = http.createServer((req, res) => {
   const { url, method } = req;
 
+  console.log(14, process.cwd());
+
   // when html sent to client, html imports will cause subsequent calls for the imports
   if (url?.endsWith(".css") && method === "GET") {
     const urlArray = url.split("/");
     const fileName = urlArray[urlArray.length - 1];
     const fileFolder = fileName.slice(0, fileName.indexOf(".css"));
 
-    return sendCSS(`src/views/${fileFolder}/${fileName}`, res);
+    // css file is not compiled to dist/ folder, so this is the proper path to find the file
+    return sendCSS(process.cwd() + `/src/views/${fileFolder}/${fileName}`, res);
+  }
+
+  if (url?.endsWith(".js") && method === "GET") {
+    const urlArray = url.split("/");
+    const fileName = urlArray[urlArray.length - 1];
+    const fileFolder = fileName.slice(0, fileName.indexOf(".js"));
+
+    // .ts file gets mapped to dist/ folder, so this is the proper path to find the file
+    return sendJS(process.cwd() + `/dist/views/${fileFolder}/${fileName}`, res);
   }
 
   if (url === "/form/product") {

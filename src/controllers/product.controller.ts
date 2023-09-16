@@ -24,7 +24,7 @@ export class ProductController {
   ): Promise<void> {
     try {
       const products = await this.productModel.findAll();
-      res.writeHead(200, { "Content-type": "application/json" });
+      res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(products));
     } catch (err) {
       console.error(err);

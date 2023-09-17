@@ -1,7 +1,7 @@
 {
-  "name": "whatever",
+  "name": "stoned",
   "version": "1.0.0",
-  "description": "App with Node.js & TS",
+  "description": "App for Products Inventory",
   "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

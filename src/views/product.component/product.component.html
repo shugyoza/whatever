@@ -10,53 +10,94 @@
     <h1>Product</h1>
     <main>
       <section>
-        <fieldset>
-          <legend>Input Form</legend>
+          <fieldset>
+            <legend>Input Form</legend>
 
-          <ul>
-            <li>
-              <label for="title">Title:</label>
-              <input
-                id="title"
-                type="text"
-                name="title"
-                placeholder="Product Title"
-              />
-            </li>
+            <ul>
+              <li>
+                <label for="title">Title:</label>
+                <input
+                  id="title"
+                  type="text"
+                  name="title"
+                  placeholder="Product Title"
+                  required
+                />
+                <span class="error" id="error-title"></span>
+              </li>
 
-            <li>
-              <label for="subtitle">Subtitle:</label>
-              <input
-                id="subtitle"
-                type="text"
-                name="subtitle"
-                placeholder="Product Subtitle"
-              />
-            </li>
+              <li>
+                <label for="subtitle">Subtitle:</label>
+                <input
+                  id="subtitle"
+                  type="text"
+                  name="subtitle"
+                  placeholder="Product Subtitle"
+                />
+                <span class="error" id="error-subtitle"></span>
+              </li>
 
-            <li>
-              <label for="description">Description:</label>
-              <textarea
-                id="description"
-                type="text"
-                name="description"
-                placeholder="Product Description"
-              ></textarea>
-            </li>
+              <li>
+                <label for="description">Description:</label>
+                <textarea
+                  id="description"
+                  type="text"
+                  name="description"
+                  placeholder="Product Description"
+                ></textarea>
+                <span class="error" id="error-description"></span>
+              </li>
 
-            <li>
-              <label for="price">Price:</label>
-              <input
-                id="price"
-                type="text"
-                name="price"
-                placeholder="Product price"
-              />
-            </li>
-          </ul>
-          <button>ADD PRODUCT</button>
-        </fieldset>
+              <li>
+                <label for="price">Price:</label>
+                <input
+                  id="price"
+                  type="text"
+                  name="price"
+                  placeholder="Product price"
+                  required
+                />
+                <span class="error" id='error-price'></span>
+              </li>
+
+              <li>
+                <label for="currency">Currency:</label>
+                <input
+                  id="currency"
+                  type="text"
+                  name="currency"
+                  disabled
+                />
+                <span class="error" id='error-currency'></span>
+              </li>
+
+              <li>
+                <label for="pictures">Pictures:</label>
+                <input
+                  id="pictures"
+                  type="text"
+                  name="pictures"
+                />
+              </li>
+
+              <li>
+                <label for="hashtags">Hashtags:</label>
+                <input
+                  id="hashtags"
+                  type="text"
+                  name="hashtags"
+                />
+              </li>
+
+
+            </ul>
+            <button id="add-product">ADD PRODUCT</button>
+            <button id="reset">RESET</button>
+          </fieldset>
+        </form>
       </section>
+      <div class="display_"></div>
     </main>
+    <script async src="product.component.js" type="module"></script>
   </body>
 </html>

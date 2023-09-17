@@ -11,8 +11,6 @@ const productController = new ProductController();
 const server = http.createServer((req, res) => {
   const { url, method } = req;
 
-  console.log(14, process.cwd());
-
   // when html sent to client, html imports will cause subsequent calls for the imports
   if (url?.endsWith(".css") && method === "GET") {
     const urlArray = url.split("/");

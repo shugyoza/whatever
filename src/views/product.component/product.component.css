@@ -10,8 +10,8 @@ li {
 input,
 textarea {
   width: 100%;
+  margin-top: 0.3em;
 }
-
 input {
   line-height: 2em;
 }
@@ -21,4 +21,8 @@ input,
 textarea {
   border: 1px solid grey;
   border-radius: 10px;
+}
+
+.error {
+  color: red;
 }

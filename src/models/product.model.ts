@@ -11,13 +11,13 @@ export class ProductModel {
   }
 
   public findAll(): Promise<Product[]> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve(this.products);
     });
   }
 
   public addOne(_product: Product): Promise<Product> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const product: Product = {
         ..._product,
         id: `${Date.now()}`,
@@ -29,14 +29,14 @@ export class ProductModel {
   }
 
   public findOne(id: number | string): Promise<Product | undefined> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const product = this.products.find((doc: Product) => doc.id === id);
       resolve(product);
     });
   }
 
   public updateOne(id: number | string, update: Product): Promise<Product> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const index = this.products.findIndex((doc: Product) => doc.id === id);
       this.products[index] = { ...update };
       writeDataToFile(this.filePath, this.products);
@@ -45,7 +45,7 @@ export class ProductModel {
   }
 
   public deleteOne(id: number | string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const index = this.products.findIndex((doc) => doc.id === id);
       const deleted = this.products.splice(index, 1)[0];
       writeDataToFile(this.filePath, this.products);

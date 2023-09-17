@@ -11,6 +11,13 @@ const productController = new ProductController();
 const server = http.createServer((req, res) => {
   const { url, method } = req;
 
+  if (url === "/") {
+    switch (method) {
+      case "GET":
+        return sendHTML("src/index.html", res);
+    }
+  }
+
   // when html sent to client, html imports will cause subsequent calls for the imports
   if (url?.endsWith(".css") && method === "GET") {
     const urlArray = url.split("/");
@@ -30,7 +37,7 @@ const server = http.createServer((req, res) => {
     return sendJS(process.cwd() + `/dist/views/${fileFolder}/${fileName}`, res);
   }
 
-  if (url === "/form/product") {
+  if (url === "/products") {
     switch (method) {
       case "GET":
         return sendHTML(
@@ -40,6 +47,23 @@ const server = http.createServer((req, res) => {
     }
   }
 
+  if (url?.match(/\/products\/([0-9]+)/)) {
+    const id = url?.split("/")[3];
+
+    if (id) {
+      switch (method) {
+        case "GET":
+          return productController.getOne(req, res, id);
+        case "PUT":
+          return;
+          productController.updateOne(req, res, id);
+        case "DELETE":
+          return productController.deleteOne(req, res, id);
+      }
+    }
+  }
+
+  // APIs
   if (url === "/api/products") {
     switch (method) {
       case "GET":

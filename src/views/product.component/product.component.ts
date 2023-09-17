@@ -6,7 +6,7 @@ document
   .querySelector("button#add-product")
   ?.addEventListener("click", clickAddProduct);
 
-document.querySelector("button#reset")?.addEventListener("click", reset);
+document.querySelector("button#reset")?.addEventListener("click", clickReset);
 
 async function clickAddProduct() {
   // reset previous error states in the array and on display
@@ -79,7 +79,7 @@ async function clickAddProduct() {
   //     .catch((err) => console.error(err));
 }
 
-function reset(): void {
+function clickReset(): void {
   const inputs = document.querySelectorAll("input");
   inputs.forEach((input) => (input.value = ""));
 

@@ -1,7 +1,7 @@
 import http from "http";
 
 import { ProductController } from "./controllers/product.controller";
-import { sendHTML, sendCSS, sendJS } from "./utils/utils";
+import { sendHTML, sendCSS, sendJS } from "./views/utils/utils";
 
 const hostname = "127.0.0.1";
 const port = 3000;
@@ -11,10 +11,16 @@ const productController = new ProductController();
 const server = http.createServer((req, res) => {
   const { url, method } = req;
 
+  /* 
+    TODO: create an endpoint to check quantity (counter) of data
+    so that it could decide to make multiple calls for pagination
+  */
+
   if (url === "/") {
     switch (method) {
       case "GET":
-        return sendHTML("src/index.html", res);
+        sendHTML("src/views/app.component/app.component.html", res); //("src/index.html", res);
+        return;
     }
   }
 

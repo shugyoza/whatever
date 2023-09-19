@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/product.component.css" rel="stylesheet" type="text/css" />
     <title>Product</title>
+
+    <!-- Must include var exports = .. to remove "Uncaught ReferenceError: exports is not defined" on browser that blocks code from running -->
+    <script>
+      var exports = {};
+    </script> 
   </head>
   <body>
     <h1>Product</h1>
@@ -99,7 +104,7 @@
           </fieldset>
         </form>
       </section>
-      <div class="display_"></div>
+      <div class="display"></div>
     </main>
     <script async src="product.component.js" type="module"></script>
   </body>

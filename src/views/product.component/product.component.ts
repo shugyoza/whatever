@@ -1,5 +1,3 @@
-import { inputValidator } from "../validators/validators";
-
 let errorMessages: Array<string[]> = [];
 
 document
@@ -7,6 +5,33 @@ document
   ?.addEventListener("click", clickAddProduct);
 
 document.querySelector("button#reset")?.addEventListener("click", clickReset);
+
+fetch("/api/products", {
+  method: "GET",
+  mode: "cors",
+  cache: "no-cache",
+  credentials: "same-origin",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  redirect: "follow",
+  referrerPolicy: "no-referrer",
+})
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  .then((response: any) => {
+    if (response.ok) {
+      return response.json(); // parses JSON response into native JavaScript objects
+    }
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  .then((result: any) => {
+    const display = document.querySelector(".display");
+    if (!display) {
+      return;
+    }
+    display.textContent = JSON.stringify(result);
+  })
+  .catch((err) => console.error(err));
 
 async function clickAddProduct() {
   // reset previous error states in the array and on display
@@ -103,5 +128,27 @@ function show(text: string, selector: string, ms: number = 0) {
 
   if (ms > 0) {
     setTimeout(() => (display.textContent = ""), ms);
+  }
+}
+
+/*
+Compile Error: 
+Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'ValidateProduct'.
+  No index signature with a parameter of type 'string' was found on type 'ValidateProduct'.ts(7053)
+Solution:
+const map: { [key: string]: any } = {}; // A map of string -> anything you like
+*/
+function inputValidator(
+  field: HTMLInputElement | HTMLTextAreaElement,
+  errorMessages: Array<string[]> // { [key: string]: any } = {};
+): void {
+  if (!field.value && field.id !== "subtitle" && field.id !== "currency") {
+    errorMessages.push([`#error-${field.id}`, `${field.id} must not be empty`]);
+  }
+  if (field.id === "price" && field.value && !Number(field.value)) {
+    errorMessages.push([
+      `#error-${field.id}`,
+      `${field.id} must be a valid number`,
+    ]);
   }
 }

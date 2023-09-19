@@ -2,7 +2,8 @@ import http from "http";
 
 import data from "../models/db/products.json";
 import { ProductModel } from "../models/product.model";
-import { extractPOSTData } from "../utils/utils";
+// import { extractPOSTData } from "../utils/utils";
+import { extractPOSTData } from "./utils/utils";
 
 const filePath = "src/models/db/products.json";
 

@@ -1,5 +1,5 @@
 import { Product } from "./db/products.interface";
-import { writeDataToFile } from "../utils/utils";
+import { writeDataToFile } from "./utils/utils";
 
 export class ProductModel {
   public filePath: string;

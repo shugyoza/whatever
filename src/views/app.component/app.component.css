@@ -3,10 +3,6 @@
   font-size: min(4rem, max(.875rem, 2vw));
 }
 
-section.form {
-  display: none;
-}
-
 li {
   list-style-type: none;
   margin: 0 2em 1em 0;
@@ -28,6 +24,11 @@ input,
 textarea {
   border: 1px solid grey;
   border-radius: 10px;
+}
+
+dialog {
+  border-radius: 10px;
+  width: 80%;
 }
 
 .error {

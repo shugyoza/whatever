@@ -1,10 +1,16 @@
+/* 
+instead of having imports, may be we can just store all the shared methods and variables in the template
+with JSON.stringify() with a display none, and every js can just grab it at runtime from the template
+parse it, and use it
+*/
+
 const productsSection: HTMLElement | null = document.querySelector(".products");
-const form: HTMLElement | null = document.querySelector("section.form");
+const form: HTMLDialogElement | null = document.querySelector("dialog.form");
 
 let products: any[] = [];
 let showProducts: boolean = false;
-let showForm: boolean = false;
 let errorMessages: Array<string[]> = [];
+let toggle: boolean = false;
 
 addListeners(
   {
@@ -13,25 +19,59 @@ addListeners(
     method: clickShowHideProducts,
   },
   {
-    selector: "button#show-add-product-form",
+    selector: "button#add-product",
     event: "click",
     method: clickShowHideForm,
   },
   {
-    selector: "button#add-product",
+    selector: "button#save",
     event: "click",
     method: clickAddProduct,
   },
-  { selector: "button#reset", event: "click", method: clickReset }
+  { selector: "button#reset", event: "click", method: clickResetForm },
+  {
+    selector: "button#close-form",
+    event: "click",
+    method: clickCloseFormDialog,
+  },
+  {
+    selector: "section.products",
+    event: "click",
+    method: clickUpdateProduct,
+  },
+  {
+    selector: "button#function-store",
+    event: "click",
+    method: () => {
+      if (!toggle) {
+        const result = storeFunctionAsDataSet(
+          "button#function-store",
+          stringifyFunction(inputValidator),
+          "inputValidator"
+        );
+        toggle = true;
+        console.log(result);
+      } else {
+        const result = getFunctionFromDataSet("button#function-store");
+        console.log({ result });
+        toggle = false;
+      }
+    },
+  }
 );
 
 function addListeners(...listeners: Array<Listener>) {
   listeners.forEach((listener) => {
     const { selector, event, method } = listener;
-    const element = document.querySelector(selector);
-    if (element) {
-      element.addEventListener(event, method);
+    const elements = document.querySelectorAll(selector);
+
+    if (!elements || !elements.length) {
+      return;
     }
+
+    elements.forEach((element) => {
+      element.addEventListener(event, method);
+    });
   });
 }
 
@@ -42,9 +82,11 @@ function clickShowHideProducts(): void {
     updateTextContent("button#show-products", "HIDE PRODUCTS");
   } else {
     const ol = document.querySelector("ol");
+
     if (!ol) {
       return;
     }
+
     productsSection?.removeChild(ol);
     showProducts = false;
     updateTextContent("button#show-products", "SHOW PRODUCTS");
@@ -56,15 +98,89 @@ function clickShowHideForm(): void {
     return;
   }
 
-  if (!showForm) {
-    showForm = true;
-    form.style.display = "block";
-    updateTextContent("button#show-add-product-form", "HIDE ADD PRODUCT FORM");
+  if (form.open) {
+    form.close();
   } else {
-    showForm = false;
-    form.style.display = "none";
-    updateTextContent("button#show-add-product-form", "SHOW ADD PRODUCT FORM");
+    form.showModal();
   }
+
+  clickResetForm();
+}
+
+function clickUpdateProduct(): void {
+  // This ..as Element is needed to counter TS error: ..property id does not exist on EventTarget
+  const buttonId = (event?.target as Element).id;
+
+  if (!form || !buttonId) {
+    return;
+  }
+
+  const selector = "button#" + buttonId;
+  // .dataset exists on HTMLElement type. This is to resolve TS error: Property 'dataset' does not exist on type 'Element'.ts(2339)
+  const button: HTMLElement | null = document.querySelector(selector);
+
+  if (!button) {
+    return;
+  }
+
+  // const id = buttonId.slice(buttonId.indexOf("-") + 1);
+  const datum = button.dataset.product
+    ? JSON.parse(button.dataset.product)
+    : {};
+
+  if (form.open) {
+    form.close();
+  } else {
+    form.showModal();
+    document.querySelectorAll("input").forEach((input) => {
+      switch (input.id) {
+        case "title":
+          input.value = datum.title;
+          break;
+        case "subtitle":
+          input.value = datum.subtitle;
+          break;
+        case "price":
+          input.value = datum.price;
+          break;
+        case "currency":
+          input.value = datum.currency;
+          break;
+        case "picture":
+          input.value = datum.picture;
+          break;
+        case "hashtags":
+          input.value = datum.hashtags;
+          break;
+      }
+    });
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function prefillField(inputField: "input" | "textarea", datum: any) {
+  document.querySelectorAll("input").forEach((input) => {
+    switch (input.id) {
+      case "title":
+        input.value = datum.title;
+        break;
+      case "subtitle":
+        input.value = datum.subtitle;
+        break;
+      case "price":
+        input.value = datum.price;
+        break;
+      case "currency":
+        input.value = datum.currency;
+        break;
+      case "picture":
+        input.value = datum.picture;
+        break;
+      case "hashtags":
+        input.value = datum.hashtags;
+        break;
+    }
+  });
 }
 
 function fetchProducts() {
@@ -91,7 +207,7 @@ function fetchProducts() {
         productsSection?.append(ol);
 
         data.forEach((datum) => {
-          const li = createHTMLElement("li");
+          const olLi = createHTMLElement("li");
 
           const fieldset = createHTMLElement(
             "fieldset",
@@ -101,16 +217,37 @@ function fetchProducts() {
 
           const ul = createHTMLElement("ul");
           for (const key in datum) {
-            const _li = createHTMLElement("li", [
-              "text",
-              `${key}: ${datum[key]}`,
-            ]);
-            ul.append(_li);
+            if (key === "title") {
+              const ulLi = createHTMLElement("h3", ["text", `${datum[key]}`]);
+              ul.append(ulLi);
+            } else if (key === "price") {
+              const ulLi = createHTMLElement("li", ["text", "$" + datum[key]]);
+              ul.append(ulLi);
+            } else if (
+              key === "subtitle" ||
+              key === "description" ||
+              key === "picture" ||
+              key === "hashtags"
+            ) {
+              const ulLi = createHTMLElement("li", ["text", `${datum[key]}`]);
+              ul.append(ulLi);
+            }
           }
 
+          const updateButton = createHTMLElement(
+            "button",
+            ["text", "UPDATE PRODUCT"],
+            ["class", "update"],
+            ["id", `update-${datum.id}`],
+            // store the datum as dataset in the html to populate the pop up form for update
+            ["data-product", JSON.stringify(datum)]
+          );
+
           fieldset.append(ul);
-          li.append(fieldset);
-          ol.append(li);
+          fieldset.append(updateButton);
+
+          olLi.append(fieldset);
+          ol.append(olLi);
           // end of list construction
         });
       })
@@ -123,29 +260,42 @@ function updateTextContent(
   text: string,
   ms: number = 0
 ): void {
-  const element = document.querySelector(selector);
-  if (!element) {
+  const elements = document.querySelectorAll(selector);
+
+  if (!elements || !elements.length) {
     return;
   }
 
-  element.textContent = text;
+  elements.forEach((element) => {
+    element.textContent = text;
 
-  if (ms > 0) {
-    setTimeout(() => (element.textContent = ""), ms);
-  }
+    if (ms > 0) {
+      setTimeout(() => (element.textContent = ""), 0);
+    }
+  });
 }
 
 function createHTMLElement(
   htmlTag: string,
   ...attributes: Array<string[]>
-): HTMLElement {
-  const element = document.createElement(htmlTag);
+): HTMLElement | HTMLInputElement {
+  const element: HTMLElement | HTMLInputElement =
+    document.createElement(htmlTag);
 
   attributes.forEach((_attribute: Array<string>) => {
     const [attribute, value] = _attribute;
 
-    if (attribute === "id" || attribute === "class") {
+    if (
+      attribute === "id" ||
+      attribute === "class" ||
+      attribute.startsWith("data-") // this is to store data
+    ) {
       element.setAttribute(attribute, value);
+    }
+
+    if (attribute === "value") {
+      element.setAttribute(attribute, value);
+      element.setAttribute("disabled", "true");
     }
 
     if (attribute === "text") {
@@ -159,9 +309,7 @@ function createHTMLElement(
 async function clickAddProduct() {
   // reset previous error states in the array and on display
   errorMessages = [];
-  document
-    .querySelectorAll(".error")
-    .forEach((error) => (error.textContent = ""));
+  updateTextContent(".error", "");
 
   const inputs = Array.from(document.querySelectorAll("input")).reduce(
     (accumulator, input) => {
@@ -186,7 +334,6 @@ async function clickAddProduct() {
   if (errorMessages.length) {
     errorMessages.forEach((error: string[]) => {
       const [selector, message] = error;
-      // show(message, selector);
       updateTextContent(selector, message);
     });
 
@@ -223,7 +370,7 @@ async function clickAddProduct() {
   //     .catch((err) => console.error(err));
 }
 
-function clickReset(): void {
+function clickResetForm(): void {
   const inputs = document.querySelectorAll("input");
   inputs.forEach((input) => (input.value = ""));
 
@@ -231,9 +378,16 @@ function clickReset(): void {
   textAreas.forEach((textArea) => (textArea.value = ""));
 
   errorMessages = [];
+  updateTextContent(".error", "");
+}
 
-  const errors = document.querySelectorAll(".error");
-  errors.forEach((error) => (error.textContent = ""));
+function clickCloseFormDialog(): void {
+  const dialog: HTMLDialogElement | null =
+    document.querySelector("dialog.form");
+
+  if (dialog) {
+    dialog.close();
+  }
 }
 
 /*
@@ -247,15 +401,74 @@ function inputValidator(
   field: HTMLInputElement | HTMLTextAreaElement,
   errorMessages: Array<string[]> // { [key: string]: any } = {};
 ): void {
-  if (!field.value && field.id !== "subtitle" && field.id !== "currency") {
-    errorMessages.push([`#error-${field.id}`, `${field.id} must not be empty`]);
+  switch (field.id) {
+    case "title":
+      if (!field.value) {
+        errorMessages.push([`#error-${field.id}`, "must not be empty"]);
+      }
+      break;
+
+    case "price":
+      if (!field.value) {
+        errorMessages.push([
+          `#error-${field.id}`,
+          `${field.id} must not be empty`,
+        ]);
+      } else if (!Number(field.value)) {
+        errorMessages.push([`#error-${field.id}`, "must be a valid number"]);
+      }
   }
-  if (field.id === "price" && field.value && !Number(field.value)) {
-    errorMessages.push([
-      `#error-${field.id}`,
-      `${field.id} must be a valid number`,
-    ]);
+}
+
+function storeFunctionAsDataSet(
+  selector: string,
+  stringifiedFunction: string,
+  datasetName: string
+) {
+  const htmlElement = document.querySelector(selector);
+
+  if (!htmlElement) {
+    return;
   }
+
+  const attribute = "data-" + datasetName;
+  htmlElement.setAttribute(attribute, stringifiedFunction);
+  return htmlElement;
+}
+
+function getFunctionFromDataSet(selector: string) {
+  const htmlElement: HTMLElement | null = document.querySelector(selector);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const functionsMap: { [key: string]: any } = {};
+
+  if (!htmlElement || !htmlElement.dataset) {
+    return;
+  }
+
+  for (const key in htmlElement.dataset) {
+    const stringifiedFunction = htmlElement.dataset[key] || "";
+    functionsMap[key] = parseFunction(stringifiedFunction);
+  }
+
+  return functionsMap;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function stringifyFunction(fn: any): string {
+  return fn.toString();
+}
+
+// function to convert a stringified function back to a function, i.e. const varName = parseFunction(stringifiedFunction)
+function parseFunction(
+  stringifiedFunction: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) {
+  // functionFactory is a closure, i.e.: function that returns another function
+  // in this case function that previously we stringified
+  const functionFactory = new Function("return " + stringifiedFunction);
+  const trueFunction = functionFactory();
+
+  return trueFunction;
 }
 
 export interface Listener {

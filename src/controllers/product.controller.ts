@@ -1,7 +1,7 @@
 import http from "http";
 
-import data from "../models/db.local/products.json";
-import { ProductModel } from "../models/db.local/product.model";
+import data from "../models/nodejs.db/products.json";
+import { ProductModel } from "../models/nodejs.db/product.model";
 import { extractPOSTData } from "./utils/utils";
 
 const filePath = "src/models/db/products.json";

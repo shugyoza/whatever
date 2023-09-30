@@ -1,10 +1,22 @@
 import http from "http";
+import dotenv from "dotenv";
 
 import { ProductController } from "./controllers/product.controller";
-import { sendHTML, sendCSS, sendJS } from "./views/utils/utils";
+import {
+  sendHTML,
+  sendCSS,
+  sendJS,
+} from "./views/utils/server-side-rendering-utils";
+import {
+  getAll,
+  getOneById,
+  addOne,
+  getDocuments,
+} from "./controllers/mysql.controller";
 
+dotenv.config();
 const hostname = "127.0.0.1";
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const productController = new ProductController();
 
@@ -19,7 +31,7 @@ const server = http.createServer((req, res) => {
   if (url === "/") {
     switch (method) {
       case "GET":
-        sendHTML("src/views/app.component/app.component.html", res); //("src/index.html", res);
+        sendHTML("src/views/main/main.html", res); //("src/index.html", res);
         return;
     }
   }
@@ -70,6 +82,50 @@ const server = http.createServer((req, res) => {
   }
 
   // APIs
+  // /api/mysql/[tableName]/
+  if (url?.match(/\/api\/mysql\/([A-Za-z0-9_-]+)\/(find)/)) {
+    const urlArray = url?.split("/");
+    const tableName = urlArray[3];
+
+    switch (method) {
+      case "POST":
+        return getDocuments(req, res, tableName);
+    }
+  }
+
+  // /api/mysql/[tableName]/:id
+  if (url?.match(/\/api\/mysql\/([A-Za-z0-9_-]+)\/([0-9]+)/)) {
+    const urlArray = url?.split("/");
+    const tableName = urlArray[3];
+    const params = urlArray[4];
+
+    switch (method) {
+      case "GET":
+        return getOneById(req, res, params, tableName);
+      case "PUT":
+        return;
+      case "DELETE":
+        return;
+    }
+  }
+
+  // /api/mysql/[tableName]
+  if (url?.match(/\/api\/mysql\/([A-Za-z0-9_-]+)/)) {
+    const urlArray = url?.split("/");
+    const tableName = urlArray[3];
+
+    if (tableName) {
+      switch (method) {
+        case "GET":
+          return getAll(res, tableName);
+        case "POST":
+          return addOne(req, res, tableName);
+        case "DELETE":
+          return;
+      }
+    }
+  }
+
   if (url === "/api/products") {
     switch (method) {
       case "GET":
@@ -97,6 +153,6 @@ const server = http.createServer((req, res) => {
   return productController.notFound(res);
 });
 
-server.listen(port, hostname, () => {
+server.listen(port, () => {
   console.log(`Server running at http://${hostname}:${port}`);
 });

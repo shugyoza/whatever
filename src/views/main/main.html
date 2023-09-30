@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Resolves TS error: "Uncaught ReferenceError: exports is not defined" on browser that blocks the code from running
+      var exports = {};
+    </script>
+    <link href="/main.css" rel="stylesheet" type="text/css" />
+    <title>whatever</title>
+  </head>
+  <body>
+    <main id="root">
+      index.html
+      <section class="products"></section>
+    </main>
+
+    <script async src="./views/utils/utils.js" type="text/javascript"></script>
+
+    <script
+      async
+      src="./views/app.component/app.component.js"
+      type="text/javascript"
+    ></script>
+    <script async src="./views/main/main.js" type="text/javascript"></script>
+  </body>
+</html>

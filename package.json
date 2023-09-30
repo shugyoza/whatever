@@ -9,9 +9,9 @@
     "build:watch": "tsc --watch",
     "dev": "nodemon dist/server.js --host 0.0.0.0",
     "start": "node dist/server.js",
-    "mysql": "node dist/models/mysql.db/product.model.js"
+    "mysql:setup": "node dist/models/mysql/setup.js"
   },
-  "keywords": [],
+  "keywords": ["TS", "JS", "typescript", "javascript", "node", "mysql"],
   "author": "shugyoza",
   "license": "ISC",
   "devDependencies": {

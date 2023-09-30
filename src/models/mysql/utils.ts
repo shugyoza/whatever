@@ -8,8 +8,11 @@ export function mysqlCreateDB(
   const { host, user, password, database } = config;
 
   if (!host || !user || !password || !database) {
-    console.error("At least one of the config properties is not defined.");
-    process.exit(1);
+    return console.error({
+      status: "Error.",
+      message: "At least one of the config properties is empty/not defined.",
+      config,
+    });
   }
 
   const mysqlDb = mysql.createConnection({ host, user, password });
@@ -19,9 +22,10 @@ export function mysqlCreateDB(
     if (err) console.error(err);
     else
       console.log({
+        status: "Success.",
+        message: "MySQL Database created.",
         query,
         config,
-        message: "Success. MySQL Database created.",
       });
 
     mysqlDisconnect(mysqlDb);
@@ -34,17 +38,21 @@ export function mysqlConnectDB(
   const { host, user, password, database } = config;
 
   if (!host || !user || !password || !database) {
-    console.error("At least one of the config properties is not defined.");
+    console.error({
+      status: "Error.",
+      message: "At least one of the config properties is not defined.",
+      config,
+    });
     process.exit(1);
+  } else {
+    console.log({
+      status: "Success.",
+      message: "MySQL Database server connected.",
+      config,
+    });
+
+    return mysql.createConnection(config);
   }
-
-  console.log({
-    config,
-    status: "Success.",
-    message: "MySQL Database server connected.",
-  });
-
-  return mysql.createConnection(config);
 }
 
 export function mysqlDropDB(
@@ -54,8 +62,11 @@ export function mysqlDropDB(
   const { host, user, password } = config;
 
   if (!host || !user || !password) {
-    console.error("At least one of the config properties is not defined.");
-    process.exit(1);
+    return console.error({
+      status: "Error.",
+      message: "At least one of the config properties is not defined.",
+      config,
+    });
   }
 
   const mysqlDb = mysql.createConnection({ host, user, password });
@@ -66,10 +77,10 @@ export function mysqlDropDB(
       console.error(err);
     } else {
       console.log({
-        query,
-        config,
         status: "Success.",
         message: "MySQL Database dropped.",
+        query,
+        config,
       });
     }
 

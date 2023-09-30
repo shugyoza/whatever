@@ -10,6 +10,7 @@ export const envConfig: MySQLConfig = {
 };
 
 // select whether to create new or use existing one
+// once database created, database name must be assigned to existing, and leave new as blank
 export const envDatabase = {
   new: process.env.MYSQL_DB_NEW,
   existing: process.env.MYSQL_DB_EXISTING,

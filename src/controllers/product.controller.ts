@@ -1,10 +1,13 @@
 import http from "http";
+import dotenv from "dotenv";
 
-import data from "../models/nodejs.db/products.json";
-import { ProductModel } from "../models/nodejs.db/product.model";
+import data from "../models/nodejs/products.json";
+import { ProductModel } from "../models/nodejs/product.model";
 import { extractPOSTData } from "./utils/utils";
 
-const filePath = "src/models/db/products.json";
+dotenv.config();
+const filePath =
+  process.env.NODEJS_DB_PRODUCTS_PATH || "src/models/db/products.json";
 
 export class ProductController {
   constructor(private productModel = new ProductModel(filePath, data)) {}

@@ -3,7 +3,6 @@ instead of having imports, may be we can just store all the shared methods and v
 with JSON.stringify() with a display none, and every js can just grab it at runtime from the template
 parse it, and use it
 */
-
 const productsSection: HTMLElement | null = document.querySelector(".products");
 const form: HTMLDialogElement | null = document.querySelector("dialog.form");
 
@@ -24,9 +23,9 @@ addListeners(
     method: clickShowHideForm,
   },
   {
-    selector: "button#save",
+    selector: "button.save",
     event: "click",
-    method: clickAddProduct,
+    method: clickSave,
   },
   { selector: "button#reset", event: "click", method: clickResetForm },
   {
@@ -38,25 +37,6 @@ addListeners(
     selector: "section.products",
     event: "click",
     method: clickUpdateProduct,
-  },
-  {
-    selector: "button#function-store",
-    event: "click",
-    method: () => {
-      if (!toggle) {
-        const result = storeFunctionAsDataSet(
-          "button#function-store",
-          stringifyFunction(inputValidator),
-          "inputValidator"
-        );
-        toggle = true;
-        console.log(result);
-      } else {
-        const result = getFunctionFromDataSet("button#function-store");
-        console.log({ result });
-        toggle = false;
-      }
-    },
   }
 );
 
@@ -69,7 +49,7 @@ function addListeners(...listeners: Array<Listener>) {
       return;
     }
 
-    elements.forEach((element) => {
+    elements.forEach((element: Element) => {
       element.addEventListener(event, method);
     });
   });
@@ -154,6 +134,8 @@ function clickUpdateProduct(): void {
           break;
       }
     });
+
+    updateTextContent("button.save", "SAVE UPDATE");
   }
 }
 
@@ -183,13 +165,30 @@ function prefillField(inputField: "input" | "textarea", datum: any) {
   });
 }
 
-function fetchProducts() {
+function fetchProducts(
+  urlPath: string = "/api/products",
+  contentType: { [key: string]: string } = {
+    "Content-Type": "application/json",
+  },
+  method: string = "GET",
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body?: any
+) {
+  const req = {
+    method,
+    headers: {
+      ...contentType,
+      // "Content-Type": "application/json",
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+
+  if (body) {
+    req.body = body;
+  }
+
   return (
-    fetch("/api/products", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    fetch(urlPath, req)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((response: any) => {
         if (response.ok) {
@@ -201,20 +200,16 @@ function fetchProducts() {
         if (!productsSection) {
           return;
         }
-
         // start constructing the list
         const ol = createHTMLElement("ol");
         productsSection?.append(ol);
-
         data.forEach((datum) => {
           const olLi = createHTMLElement("li");
-
           const fieldset = createHTMLElement(
             "fieldset",
             ["id", `tile-datum-${datum.id}`],
             ["class", "tile-datum"]
           );
-
           const ul = createHTMLElement("ul");
           for (const key in datum) {
             if (key === "title") {
@@ -233,7 +228,6 @@ function fetchProducts() {
               ul.append(ulLi);
             }
           }
-
           const updateButton = createHTMLElement(
             "button",
             ["text", "UPDATE PRODUCT"],
@@ -242,10 +236,8 @@ function fetchProducts() {
             // store the datum as dataset in the html to populate the pop up form for update
             ["data-product", JSON.stringify(datum)]
           );
-
           fieldset.append(ul);
           fieldset.append(updateButton);
-
           olLi.append(fieldset);
           ol.append(olLi);
           // end of list construction
@@ -306,7 +298,9 @@ function createHTMLElement(
   return element;
 }
 
-async function clickAddProduct() {
+async function clickSave() {
+  console.log("clickSave");
+
   // reset previous error states in the array and on display
   errorMessages = [];
   updateTextContent(".error", "");
@@ -325,10 +319,18 @@ async function clickAddProduct() {
   );
 
   // grab value of description since it is a textarea instead of input tag
-  const descriptionElement: HTMLTextAreaElement | null = document.querySelector(
-    "textarea#description"
+  const textAreas = Array.from(document.querySelectorAll("textarea")).reduce(
+    (accumulator, textArea) => {
+      // validate while iterating through all the submitted textareas
+      inputValidator(textArea, errorMessages);
+
+      // compile all the textareas into an object
+      accumulator[textArea.id] = textArea.value;
+      return accumulator;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    {} as any
   );
-  const description = descriptionElement?.value;
 
   // if there is any invalid input, display the error message(s) and return.
   if (errorMessages.length) {
@@ -344,7 +346,7 @@ async function clickAddProduct() {
   const body = {
     id: "",
     ...inputs,
-    description,
+    ...textAreas,
     currency: "USD",
     hashtags: "",
     pictures: "",
@@ -354,7 +356,7 @@ async function clickAddProduct() {
 
   console.log(body);
   //   await fetch("/api/products", {
-  //     method: "POST",
+  //     method,
   //     headers: {
   //       "Content-Type": "application/json",
   //     },
@@ -397,6 +399,7 @@ Element implicitly has an 'any' type because expression of type 'string' can't b
 Solution:
 const map: { [key: string]: any } = {}; // A map of string -> anything you like
 */
+/*
 function inputValidator(
   field: HTMLInputElement | HTMLTextAreaElement,
   errorMessages: Array<string[]> // { [key: string]: any } = {};
@@ -410,68 +413,15 @@ function inputValidator(
 
     case "price":
       if (!field.value) {
-        errorMessages.push([
-          `#error-${field.id}`,
-          `${field.id} must not be empty`,
-        ]);
+        errorMessages.push([`#error-${field.id}`, "must not be empty"]);
       } else if (!Number(field.value)) {
         errorMessages.push([`#error-${field.id}`, "must be a valid number"]);
       }
   }
 }
+*/
 
-function storeFunctionAsDataSet(
-  selector: string,
-  stringifiedFunction: string,
-  datasetName: string
-) {
-  const htmlElement = document.querySelector(selector);
-
-  if (!htmlElement) {
-    return;
-  }
-
-  const attribute = "data-" + datasetName;
-  htmlElement.setAttribute(attribute, stringifiedFunction);
-  return htmlElement;
-}
-
-function getFunctionFromDataSet(selector: string) {
-  const htmlElement: HTMLElement | null = document.querySelector(selector);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const functionsMap: { [key: string]: any } = {};
-
-  if (!htmlElement || !htmlElement.dataset) {
-    return;
-  }
-
-  for (const key in htmlElement.dataset) {
-    const stringifiedFunction = htmlElement.dataset[key] || "";
-    functionsMap[key] = parseFunction(stringifiedFunction);
-  }
-
-  return functionsMap;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function stringifyFunction(fn: any): string {
-  return fn.toString();
-}
-
-// function to convert a stringified function back to a function, i.e. const varName = parseFunction(stringifiedFunction)
-function parseFunction(
-  stringifiedFunction: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) {
-  // functionFactory is a closure, i.e.: function that returns another function
-  // in this case function that previously we stringified
-  const functionFactory = new Function("return " + stringifiedFunction);
-  const trueFunction = functionFactory();
-
-  return trueFunction;
-}
-
-export interface Listener {
+interface Listener {
   selector: string;
   event: string;
   method: () => void;

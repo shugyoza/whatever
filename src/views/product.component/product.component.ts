@@ -1,4 +1,4 @@
-let errorMessages: Array<string[]> = [];
+// let errorMessages: Array<string[]> = [];
 
 document
   .querySelector("button#add-product")
